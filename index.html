@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>The Roost</title>
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
   <style>
     html, body, #map {
       height: 100%;
@@ -35,7 +35,7 @@
 </head>
 <body>
   <div id="icon-picker">
-    <span style="color:white;">Select:</span><br/>
+    <span style="color:white;">Select:</span><br>
     <img src="icons/gotnumber.png" width="40" data-type="gotnumber" class="selected">
     <img src="icons/kissed.png" width="40" data-type="kissed">
     <img src="icons/carhookup.png" width="40" data-type="carhookup">
@@ -46,11 +46,10 @@
   </div>
   <div id="map"></div>
 
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { getFirestore, collection, addDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-
+  <script>
     const firebaseConfig = {
       apiKey: "AIzaSyCuxzbdg90g5Ih-kkwqTkJBYyiseaZ1yx0",
       authDomain: "cocker-59baa.firebaseapp.com",
@@ -59,9 +58,8 @@
       messagingSenderId: "336923549983",
       appId: "1:336923549983:web:f6b18fbda5ab290fc3d02a"
     };
-
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
 
     const map = L.map('map').setView([37.0902, -95.7129], 4);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -71,30 +69,30 @@
 
     let selectedEncounter = "gotnumber";
 
-    document.querySelectorAll('#icon-picker img').forEach(img => {
-      img.addEventListener('click', () => {
-        selectedEncounter = img.dataset.type;
-        document.querySelectorAll('#icon-picker img').forEach(i => i.classList.remove('selected'));
+    document.querySelectorAll('#icon-picker img').forEach(function(img) {
+      img.addEventListener('click', function() {
+        selectedEncounter = img.getAttribute('data-type');
+        document.querySelectorAll('#icon-picker img').forEach(function(i) {
+          i.classList.remove('selected');
+        });
         img.classList.add('selected');
       });
     });
 
-    onSnapshot(collection(db, "markers"), (snapshot) => {
-      snapshot.docChanges().forEach((change) => {
+    db.collection("markers").onSnapshot(function(snapshot) {
+      snapshot.docChanges().forEach(function(change) {
         if (change.type === "added") {
           const data = change.doc.data();
-          const popupHtml = "<strong>" + (data.user || "Anonymous") + "</strong><br/><img src='icons/" + data.encounter + ".png' width='48'>";
+          const popupHtml = "<strong>" + (data.user || "Anonymous") + "</strong><br><img src='icons/" + data.encounter + ".png' width='48'>";
           L.marker([data.lat, data.lng]).addTo(map).bindPopup(popupHtml);
         }
       });
     });
 
-    map.on('click', async (e) => {
-      const lat = e.latlng.lat;
-      const lng = e.latlng.lng;
-      await addDoc(collection(db, "markers"), {
-        lat: lat,
-        lng: lng,
+    map.on('click', function(e) {
+      db.collection("markers").add({
+        lat: e.latlng.lat,
+        lng: e.latlng.lng,
         encounter: selectedEncounter,
         user: "Guest",
         timestamp: Date.now()
