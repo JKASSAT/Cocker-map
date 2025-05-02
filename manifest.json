@@ -1,9 +1,0 @@
-{
-  "name": "Cocker Map",
-  "short_name": "Cocker",
-  "start_url": "index.html",
-  "display": "standalone",
-  "background_color": "#ffffff",
-  "description": "Track your conquests with flair.",
-  "icons": []
-}
