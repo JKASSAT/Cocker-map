@@ -31,15 +31,6 @@
       border: 2px solid #fff;
       border-radius: 6px;
     }
-    #search {
-      position: absolute;
-      top: 10px;
-      right: 10px;
-      z-index: 1000;
-      background: white;
-      padding: 6px;
-      border-radius: 6px;
-    }
   </style>
 </head>
 <body>
@@ -52,10 +43,6 @@
     <img src="icons/breakfast.png" width="40" data-type="breakfast">
     <img src="icons/goback.png" width="40" data-type="goback">
     <img src="icons/placerocked.png" width="40" data-type="placerocked">
-  </div>
-  <div id="search">
-    <input type="text" id="locationInput" placeholder="Enter ZIP or place" />
-    <button onclick="zoomToLocation()">Go</button>
   </div>
   <div id="map"></div>
 
@@ -96,41 +83,23 @@
       snapshot.docChanges().forEach((change) => {
         if (change.type === "added") {
           const data = change.doc.data();
-          L.marker([data.lat, data.lng])
-            .addTo(map)
-            .bindPopup(\`<strong>\${data.user || 'Anonymous'}</strong><br/><img src="icons/\${data.encounter}.png" width="48">\`);
+          const popupHtml = "<strong>" + (data.user || "Anonymous") + "</strong><br/><img src='icons/" + data.encounter + ".png' width='48'>";
+          L.marker([data.lat, data.lng]).addTo(map).bindPopup(popupHtml);
         }
       });
     });
 
     map.on('click', async (e) => {
-      const { lat, lng } = e.latlng;
+      const lat = e.latlng.lat;
+      const lng = e.latlng.lng;
       await addDoc(collection(db, "markers"), {
-        lat, lng,
+        lat: lat,
+        lng: lng,
         encounter: selectedEncounter,
         user: "Guest",
         timestamp: Date.now()
       });
     });
-
-    window.zoomToLocation = function() {
-      const query = document.getElementById("locationInput").value;
-      if (!query) return;
-      fetch(\`https://nominatim.openstreetmap.org/search?format=json&q=\${encodeURIComponent(query)}\`)
-        .then(res => res.json())
-        .then(data => {
-          console.log("Search result:", data);
-          if (data.length > 0) {
-            const { lat, lon } = data[0];
-            map.setView([parseFloat(lat), parseFloat(lon)], 14);
-          } else {
-            alert("Location not found.");
-          }
-        })
-        .catch(err => {
-          console.error("Search failed", err);
-        });
-    };
   </script>
 </body>
 </html>
