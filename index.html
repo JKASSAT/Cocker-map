@@ -1,42 +1,129 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <title>Cocker Demo (Fake Data)</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-  <link rel="manifest" href="manifest.json" />
-  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
-  <style>html, body, #map { height: 100%; margin: 0; padding: 0; font-family: sans-serif; }</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>The Roost</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <style>
+    html, body, #map {
+      height: 100%;
+      margin: 0;
+    }
+    #icon-picker {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background: black;
+      padding: 10px;
+      border-radius: 8px;
+      z-index: 1000;
+    }
+    #icon-picker img {
+      cursor: pointer;
+      opacity: 0.5;
+      margin: 2px;
+    }
+    #icon-picker img.selected {
+      opacity: 1;
+      border: 2px solid #fff;
+      border-radius: 6px;
+    }
+    #search {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      z-index: 1000;
+      background: white;
+      padding: 6px;
+      border-radius: 6px;
+    }
+  </style>
 </head>
 <body>
-<div id="map"></div>
-<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-<script>
-if ('serviceWorker' in navigator) navigator.serviceWorker.register('service-worker.js');
+  <div id="icon-picker">
+    <span style="color:white;">Select:</span><br/>
+    <img src="icons/gotnumber.png" width="40" data-type="gotnumber" class="selected">
+    <img src="icons/kissed.png" width="40" data-type="kissed">
+    <img src="icons/carhookup.png" width="40" data-type="carhookup">
+    <img src="icons/tookhome.png" width="40" data-type="tookhome">
+    <img src="icons/breakfast.png" width="40" data-type="breakfast">
+    <img src="icons/goback.png" width="40" data-type="goback">
+    <img src="icons/placerocked.png" width="40" data-type="placerocked">
+  </div>
+  <div id="search">
+    <input type="text" id="locationInput" placeholder="Enter ZIP or place" />
+    <button onclick="zoomToLocation()">Go</button>
+  </div>
+  <div id="map"></div>
 
-const map = L.map('map').setView([37.09, -95.71], 4);
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-  maxZoom: 19,
-  attribution: '&copy; OpenStreetMap contributors'
-}).addTo(map);
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getFirestore, collection, addDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-const fakeData = [
-  { lat: 40.73061, lng: -73.935242, label: "🔥 Got laid at Velvet Vibe Lounge", user: "@hotshot69" },
-  { lat: 34.052235, lng: -118.243683, label: "💋 Got a kiss at The Sweaty Peach", user: "@smoothmoves" },
-  { lat: 41.878113, lng: -87.629799, label: "😉 Flirted hard at Club Mirage", user: "@sugarwolf" },
-  { lat: 29.760427, lng: -95.369804, label: "☕ Woke up together near Motel Mirage", user: "@coffeebae" },
-  { lat: 47.606209, lng: -122.332069, label: "🍂 Got a number outside The Moonlit Taproom", user: "@latebloomer" },
-  { lat: 39.739236, lng: -104.990251, label: "🔥 Got laid behind Rattle & Hum", user: "@deepvibes" },
-  { lat: 25.761681, lng: -80.191788, label: "💋 Got a kiss under neon lights", user: "@midnightmark" },
-  { lat: 33.448376, lng: -112.074036, label: "😉 Flirted hard in bathroom line", user: "@tequilaqueen" },
-  { lat: 36.169941, lng: -115.139832, label: "🔥 Got laid at Lucky Larry’s", user: "@corkpopper" },
-  { lat: 32.7767, lng: -96.7970, label: "☕ Woke up together in hotel lobby", user: "@hangoverhero" }
-];
+    const firebaseConfig = {
+      apiKey: "AIzaSyCuxzbdg90g5Ih-kkwqTkJBYyiseaZ1yx0",
+      authDomain: "cocker-59baa.firebaseapp.com",
+      projectId: "cocker-59baa",
+      storageBucket: "cocker-59baa.firebasestorage.app",
+      messagingSenderId: "336923549983",
+      appId: "1:336923549983:web:f6b18fbda5ab290fc3d02a"
+    };
 
-fakeData.forEach(entry => {
-  const marker = L.marker([entry.lat, entry.lng]).addTo(map);
-  marker.bindPopup(`<strong>${entry.label}</strong><br><em>${entry.user}</em>`);
-});
-</script>
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    const map = L.map('map').setView([37.0902, -95.7129], 4);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19
+    }).addTo(map);
+
+    let selectedEncounter = "gotnumber";
+
+    document.querySelectorAll('#icon-picker img').forEach(img => {
+      img.addEventListener('click', () => {
+        selectedEncounter = img.dataset.type;
+        document.querySelectorAll('#icon-picker img').forEach(i => i.classList.remove('selected'));
+        img.classList.add('selected');
+      });
+    });
+
+    onSnapshot(collection(db, "markers"), (snapshot) => {
+      snapshot.docChanges().forEach((change) => {
+        if (change.type === "added") {
+          const data = change.doc.data();
+          L.marker([data.lat, data.lng])
+            .addTo(map)
+            .bindPopup(\`<strong>\${data.user || 'Anonymous'}</strong><br/><img src="icons/\${data.encounter}.png" width="48">`);
+        }
+      });
+    });
+
+    map.on('click', async (e) => {
+      const { lat, lng } = e.latlng;
+      await addDoc(collection(db, "markers"), {
+        lat, lng,
+        encounter: selectedEncounter,
+        user: "Guest",
+        timestamp: Date.now()
+      });
+    });
+
+    window.zoomToLocation = function() {
+      const query = document.getElementById("locationInput").value;
+      if (!query) return;
+      fetch(\`https://nominatim.openstreetmap.org/search?format=json&q=\${query}\`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.length > 0) {
+            const { lat, lon } = data[0];
+            map.setView([parseFloat(lat), parseFloat(lon)], 14);
+          } else {
+            alert("Location not found.");
+          }
+        });
+    };
+  </script>
 </body>
 </html>
