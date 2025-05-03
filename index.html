@@ -90,7 +90,7 @@
       placerocked: 1.2
     };
 
-    let heatLayer = L.heatLayer([], { radius: 25, blur: 20, maxZoom: 14, gradient: {0.4:'blue',0.6:'orange',1.0:'red'}, minOpacity: 0.3 }).addTo(map);
+    let heatLayer = L.heatLayer([], { radius: 35, blur: 40, maxZoom: 15, minOpacity: 0.2, gradient: { 0.1: 'green', 0.3: 'yellow', 0.5: 'orange', 0.7: 'red', 1.0: 'hotpink' } }).addTo(map);
 
     db.collection("ratings").onSnapshot(snapshot => {
       const heatData = [];
@@ -194,11 +194,20 @@
   }
 </script>
 
-<div id="notify-box" style="position:fixed;bottom:60px;right:10px;z-index:9999;background:white;padding:10px;border-radius:6px;box-shadow:0 2px 10px rgba(0,0,0,0.3)">
+<div id="notify-box" style="position:fixed;bottom:10px;right:10px;z-index:9999;background:white;padding:10px;border-radius:6px;box-shadow:0 2px 10px rgba(0,0,0,0.3)">
   <button onclick="subscribeToPush()">Notify me when it’s hot nearby</button>
 </div>
-<div style="position:fixed;bottom:10px;right:10px;z-index:9999;background:white;padding:10px;border-radius:6px;box-shadow:0 2px 10px rgba(0,0,0,0.3)">
+<div style="position:fixed;bottom:10px;left:10px;z-index:9999;background:white;padding:10px;border-radius:6px;box-shadow:0 2px 10px rgba(0,0,0,0.3)">
   <button id="heat-toggle" onclick="toggleHeatmap()">Hide Heatmap</button>
+</div>
+<div id="legend" style="position:fixed;bottom:60px;left:10px;z-index:9999;background:white;padding:10px;border-radius:6px;box-shadow:0 2px 10px rgba(0,0,0,0.3);font-size:12px;">
+  <strong>Heatmap Key</strong><br>
+  <span style="background:green;color:white;padding:2px 8px;border-radius:3px;">Got Number</span><br>
+  <span style="background:blue;color:white;padding:2px 8px;border-radius:3px;">Kissed</span><br>
+  <span style="background:yellow;color:black;padding:2px 8px;border-radius:3px;">Car Hookup</span><br>
+  <span style="background:orange;color:white;padding:2px 8px;border-radius:3px;">Took Home</span><br>
+  <span style="background:red;color:white;padding:2px 8px;border-radius:3px;">Breakfast</span><br>
+  <span style="background:hotpink;color:white;padding:2px 8px;border-radius:3px;">Place Rocked</span>
 </div>
 
 <script>
