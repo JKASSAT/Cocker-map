@@ -167,7 +167,13 @@
   const messaging = getMessaging(app);
   const db = getFirestore(app);
 
-  async function subscribeToPush() {
+  async 
+function subscribeToPush() {
+  console.log("Notify button clicked");
+  const box = document.getElementById('notify-box');
+  box.innerHTML = "<span style='font-size:14px;color:green;'>You’ll be notified when action heats up nearby.</span>";
+}
+
     try {
       const permission = await Notification.requestPermission();
       if (permission === "granted") {
@@ -222,7 +228,13 @@
   const messaging = firebase.messaging();
   const db = firebase.firestore();
 
-  async function subscribeToPush() {
+  async 
+function subscribeToPush() {
+  console.log("Notify button clicked");
+  const box = document.getElementById('notify-box');
+  box.innerHTML = "<span style='font-size:14px;color:green;'>You’ll be notified when action heats up nearby.</span>";
+}
+
     try {
       const permission = await Notification.requestPermission();
       if (permission === "granted") {
