@@ -193,6 +193,107 @@
     }
   }
 </script>
+
+<div id="notify-box" style="position:fixed;bottom:10px;right:10px;z-index:9999;background:white;padding:10px;border-radius:6px;box-shadow:0 2px 10px rgba(0,0,0,0.3)">
+  <button id="notify-btn" onclick="subscribeToPush()">Notify me when it’s hot nearby</button>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getMessaging, getToken } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging.js";
+  import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyCuxzbdg90g5Ih-kkwqTkJBYyiseaZ1yx0",
+    authDomain: "cocker-59baa.firebaseapp.com",
+    projectId: "cocker-59baa",
+    messagingSenderId: "336923549983",
+    appId: "1:336923549983:web:f6b18fbda5ab290fc3d02a"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const messaging = getMessaging(app);
+  const db = getFirestore(app);
+
+  async function subscribeToPush() {
+    try {
+      const permission = await Notification.requestPermission();
+      if (permission === "granted") {
+        const token = await getToken(messaging, {
+          vapidKey: "BFYNAF5bN7w8DMdKj3ISSAYnek4urPwxP2bE3tpYiovkzEd7oYbTaZjCMGulxKyveR2jDL4muScpds0TMleJfBc"
+        });
+
+        navigator.geolocation.getCurrentPosition(async (pos) => {
+          const docRef = doc(db, "subscribers", token);
+          await setDoc(docRef, {
+            token,
+            lat: pos.coords.latitude,
+            lng: pos.coords.longitude,
+            timestamp: Date.now()
+          });
+
+          const box = document.getElementById("notify-box");
+          box.innerHTML = "<div style='color:green;font-weight:bold;'>You’re set to get heat alerts!</div>";
+        });
+      } else {
+        alert("Notification permission denied.");
+      }
+    } catch (err) {
+      console.error("Subscription failed", err);
+    }
+  }
+</script>
+
+<div id="notify-box" style="position:fixed;bottom:10px;right:10px;z-index:9999;background:white;padding:10px;border-radius:6px;box-shadow:0 2px 10px rgba(0,0,0,0.3)">
+  <button onclick="subscribeToPush()">Notify me when it’s hot nearby</button>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getMessaging, getToken } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging.js";
+  import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyCuxzbdg90g5Ih-kkwqTkJBYyiseaZ1yx0",
+    authDomain: "cocker-59baa.firebaseapp.com",
+    projectId: "cocker-59baa",
+    messagingSenderId: "336923549983",
+    appId: "1:336923549983:web:f6b18fbda5ab290fc3d02a"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const messaging = getMessaging(app);
+  const db = getFirestore(app);
+
+  async function subscribeToPush() {
+    try {
+      const permission = await Notification.requestPermission();
+      if (permission === "granted") {
+        const token = await getToken(messaging, {
+          vapidKey: "BFYNAF5bN7w8DMdKj3ISSAYnek4urPwxP2bE3tpYiovkzEd7oYbTaZjCMGulxKyveR2jDL4muScpds0TMleJfBc"
+        });
+
+        navigator.geolocation.getCurrentPosition(async (pos) => {
+          const docRef = doc(db, "subscribers", token);
+          await setDoc(docRef, {
+            token,
+            lat: pos.coords.latitude,
+            lng: pos.coords.longitude,
+            timestamp: Date.now()
+          });
+          
+  const notifyBox = document.getElementById("notify-box");
+  notifyBox.innerHTML = "<div style='color:green;font-weight:bold;'>You’re set to get heat alerts!</div>";
+  
+        });
+      } else {
+        alert("Notification permission denied.");
+      }
+    } catch (err) {
+      console.error("Subscription failed", err);
+    }
+  }
+</script>
 </body>
 </html>
 
