@@ -168,7 +168,14 @@
   const db = getFirestore(app);
 
   async 
+
 function subscribeToPush() {
+  const box = document.getElementById('notify-box');
+  box.innerHTML = "<span style='font-size:14px;color:green;'>You’ll be notified when action heats up nearby.</span>";
+  const status = document.getElementById('debugStatus');
+  if (status) status.textContent = 'Status: Notify clicked';
+}
+
   console.log("Notify button clicked");
   const box = document.getElementById('notify-box');
   box.innerHTML = "<span style='font-size:14px;color:green;'>You’ll be notified when action heats up nearby.</span>";
@@ -229,7 +236,14 @@ function subscribeToPush() {
   const db = firebase.firestore();
 
   async 
+
 function subscribeToPush() {
+  const box = document.getElementById('notify-box');
+  box.innerHTML = "<span style='font-size:14px;color:green;'>You’ll be notified when action heats up nearby.</span>";
+  const status = document.getElementById('debugStatus');
+  if (status) status.textContent = 'Status: Notify clicked';
+}
+
   console.log("Notify button clicked");
   const box = document.getElementById('notify-box');
   box.innerHTML = "<span style='font-size:14px;color:green;'>You’ll be notified when action heats up nearby.</span>";
@@ -260,7 +274,21 @@ function subscribeToPush() {
     }
   }
 
-  function toggleHeatmap() {
+  
+function toggleHeatmap() {
+  const status = document.getElementById('debugStatus');
+  if (heatmapVisible) {
+    map.removeLayer(heatLayer);
+    document.getElementById("heat-toggle").innerText = "Show Heatmap";
+    if (status) status.textContent = 'Status: Heatmap hidden';
+  } else {
+    map.addLayer(heatLayer);
+    document.getElementById("heat-toggle").innerText = "Hide Heatmap";
+    if (status) status.textContent = 'Status: Heatmap shown';
+  }
+  heatmapVisible = !heatmapVisible;
+}
+
     const current = map.hasLayer(heatLayer);
     if (current) {
       map.removeLayer(heatLayer);
@@ -271,6 +299,11 @@ function subscribeToPush() {
     }
   }
 </script>
+
+<div id="debugStatus" style="position:fixed;top:5px;left:5px;z-index:9999;background:black;color:white;padding:4px 8px;border-radius:4px;font-size:12px;">
+  Status: Ready
+</div>
+
 </body>
 </html>
 
